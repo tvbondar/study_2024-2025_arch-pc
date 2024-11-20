@@ -1,42 +1,50 @@
 		; Запись в файл строки введененой на запрос
 %include 'in_out.asm'
+
 SECTION .data
-	filename db 'readme3.txt', 0h 				; Имя файла
-	msg db 'Как вас зовут? ', 0h 				; Сообщение
+	filename db 'readme3.txt', 0h
+	msg1 db 'Как Вас зовут?', 0h
+	msg2 db 'Меня зовут ', 0h
 
 SECTION .bss
-	contents resb 255 					; переменная для вводимой строки
+	name resb 255
+
 SECTION .text
 global _start
 _start:
-		; Печать сообщения `msg`
-	mov eax,msg
+	mov eax, msg1
 	call sprint
-		; ---- Запись введеной с клавиатуры строки в `contents`
-	mov ecx, contents
+
+	mov ecx, name
 	mov edx, 255
 	call sread
-		; --- Открытие и создание файла (`sys_create`)
-	mov ecx, 0777o 						; установка прав доступа
-	mov ebx, filename					; имя создаваемого файла
-	mov eax, 8						; номер системного вызова sys _create
-	int 80h							;вызов ядра
-		; --- Запись дескриптора файла в `esi`
+
+	mov eax, 8
+	mov ebx, filename
+	mov ecx, 0744o
+	int 80h
+
 	mov esi, eax
-		; --- Расчет длины введенной строки
-	mov eax, contents 					; в `eax` запишется количество
-	call slen						 ; введенных байтов
-		; --- Записываем в файл `contents` (`sys_write`)
+
+	mov eax, msg2
+	call slen
 	mov edx, eax
-	mov ecx, contents
+	mov ecx, msg2
 	mov ebx, esi
 	mov eax, 4
 	int 80h
-		; --- Закрываем файл (`sys_close`)
+
+	mov eax, name
+	call slen
+	mov edx, eax
+	mov ecx, name
+	mov ebx, esi
+	mov eax, 4
+	int 80h
+
 	mov ebx, esi
 	mov eax, 6
 	int 80h
 	call quit
-
 
 
